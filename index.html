@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculateur DAS / Payroll Deduction Calculator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      line-height: 1.5;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 1.5rem;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 0;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .tab {
+      padding: 10px 24px;
+      background: #dde;
+      border: none;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #555;
+    }
+    .tab.active {
+      background: #fff;
+      color: #1a1a2e;
+      font-weight: 600;
+    }
+    .panel {
+      display: none;
+      background: #fff;
+      border-radius: 0 8px 8px 8px;
+      padding: 24px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .panel.active { display: block; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group.full { grid-column: 1 / -1; }
+    label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+      color: #444;
+    }
+    input, select {
+      padding: 8px 12px;
+      border: 1px solid #ccd;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background: #fafbfc;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #4a7cf7;
+      box-shadow: 0 0 0 2px rgba(74,124,247,0.15);
+    }
+    .checkbox-group {
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+    .toggle-row {
+      display: flex;
+      gap: 24px;
+      grid-column: 1 / -1;
+    }
+    button.calc-btn {
+      grid-column: 1 / -1;
+      padding: 12px;
+      background: #4a7cf7;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    button.calc-btn:hover { background: #3a6ce7; }
+    .results {
+      margin-top: 20px;
+    }
+    .results h3 {
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+    table.result-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table.result-table th,
+    table.result-table td {
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 1px solid #eef;
+    }
+    table.result-table td:last-child {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    table.result-table tr.section-header td {
+      font-weight: 600;
+      background: #f5f7fa;
+      padding-top: 12px;
+    }
+    table.result-table tr.total td {
+      font-weight: 700;
+      border-top: 2px solid #1a1a2e;
+      font-size: 1.05rem;
+    }
+    table.result-table tr.net td {
+      font-weight: 700;
+      color: #2a7a2a;
+      font-size: 1.1rem;
+      border-top: 2px solid #2a7a2a;
+    }
+    .collapsible-header {
+      cursor: pointer;
+      padding: 8px 0;
+      font-weight: 500;
+      color: #4a7cf7;
+      grid-column: 1 / -1;
+      user-select: none;
+      font-size: 0.9rem;
+    }
+    .collapsible-header::before {
+      content: '\25B6 ';
+      font-size: 0.7rem;
+    }
+    .collapsible-header.open::before {
+      content: '\25BC ';
+    }
+    .collapsible-content {
+      display: none;
+      grid-column: 1 / -1;
+    }
+    .collapsible-content.open {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .hidden { display: none !important; }
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .toggle-row { flex-direction: column; gap: 12px; }
+      .collapsible-content.open { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Calculateur DAS</h1>
+<p class="subtitle">Retenues a la source et remises / Payroll Deductions & Remittances (Quebec, 2016-2025)</p>
+
+<div class="tabs">
+  <button class="tab active" data-tab="das">Retenues (Deductions)</button>
+  <button class="tab" data-tab="remit">Remises (Remittances)</button>
+</div>
+
+<!-- ==================== DAS Panel ==================== -->
+<div id="das" class="panel active">
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="das-year">Annee (Year)</label>
+      <select id="das-year"></select>
+    </div>
+    <div class="form-group hidden" id="das-period-group">
+      <label for="das-period">Periode (Period)</label>
+      <select id="das-period">
+        <option value="jan">Avant juillet (Before July 1)</option>
+        <option value="july">Apres juillet (July 1 and after)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="das-freq">Frequence de paie (Pay frequency)</label>
+      <select id="das-freq"></select>
+    </div>
+    <div class="form-group">
+      <label for="das-gross">Salaire brut (Gross pay) $</label>
+      <input type="text" id="das-gross" placeholder="2,500.00" inputmode="decimal">
+    </div>
+    <div class="form-group full">
+      <label for="das-status">Statut (Status)</label>
+      <select id="das-status"></select>
+    </div>
+    <div class="toggle-row">
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="das-ei" checked>
+        <label for="das-ei">Assujetti a l'AE (EI subject)</label>
+      </div>
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="das-qpp" checked>
+        <label for="das-qpp">Assujetti au RRQ (QPP subject)</label>
+      </div>
+    </div>
+
+    <div class="collapsible-header" id="cumul-toggle">Soldes cumulatifs (Cumulative balances)</div>
+    <div class="collapsible-content" id="cumul-content">
+      <div class="form-group">
+        <label for="das-cumul-salary">Salaire cumul. (Cumul. salary) $</label>
+        <input type="text" id="das-cumul-salary" placeholder="0.00" inputmode="decimal">
+      </div>
+      <div class="form-group">
+        <label for="das-cumul-qpp">RRQ cumul. (Cumul. QPP) $</label>
+        <input type="text" id="das-cumul-qpp" placeholder="0.00" inputmode="decimal">
+      </div>
+      <div class="form-group">
+        <label for="das-cumul-qpp2">RRQ2 cumul. (Cumul. QPP2) $</label>
+        <input type="text" id="das-cumul-qpp2" placeholder="0.00" inputmode="decimal">
+      </div>
+      <div class="form-group">
+        <label for="das-cumul-qpip">RQAP cumul. (Cumul. QPIP) $</label>
+        <input type="text" id="das-cumul-qpip" placeholder="0.00" inputmode="decimal">
+      </div>
+      <div class="form-group">
+        <label for="das-cumul-ei">AE cumul. (Cumul. EI) $</label>
+        <input type="text" id="das-cumul-ei" placeholder="0.00" inputmode="decimal">
+      </div>
+    </div>
+
+    <button class="calc-btn" id="das-calc">Calculer (Calculate)</button>
+  </div>
+
+  <div class="results" id="das-results" style="display:none">
+    <h3>Resultats (Results)</h3>
+    <table class="result-table" id="das-table"></table>
+  </div>
+</div>
+
+<!-- ==================== Remittance Panel ==================== -->
+<div id="remit" class="panel">
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="remit-year">Annee (Year)</label>
+      <select id="remit-year"></select>
+    </div>
+    <div class="form-group">
+      <label for="remit-gross">Salaire brut (Gross payroll) $</label>
+      <input type="text" id="remit-gross" placeholder="2,500.00" inputmode="decimal">
+    </div>
+    <div class="form-group">
+      <label for="remit-qctax">Impot QC retenu (QC tax withheld) $</label>
+      <input type="text" id="remit-qctax" placeholder="0.00" inputmode="decimal">
+    </div>
+    <div class="form-group">
+      <label for="remit-fedtax">Impot fed. retenu (Fed tax withheld) $</label>
+      <input type="text" id="remit-fedtax" placeholder="0.00" inputmode="decimal">
+    </div>
+    <div class="form-group">
+      <label for="remit-qpp">RRQ employe (QPP employee) $</label>
+      <input type="text" id="remit-qpp" placeholder="0.00" inputmode="decimal">
+    </div>
+    <div class="form-group">
+      <label for="remit-qpip">RQAP employe (QPIP employee) $</label>
+      <input type="text" id="remit-qpip" placeholder="0.00" inputmode="decimal">
+    </div>
+    <div class="form-group">
+      <label for="remit-ei">AE employe (EI employee) $</label>
+      <input type="text" id="remit-ei" placeholder="0.00" inputmode="decimal">
+    </div>
+    <div class="form-group">
+      <label for="remit-cnesst">Taux CNESST par 100$ (CNESST rate per $100)</label>
+      <input type="text" id="remit-cnesst" placeholder="1.65" inputmode="decimal">
+    </div>
+
+    <button class="calc-btn" id="remit-calc">Calculer (Calculate)</button>
+  </div>
+
+  <div class="results" id="remit-results" style="display:none">
+    <h3>Remise totale (Total remittance)</h3>
+    <table class="result-table" id="remit-table"></table>
+  </div>
+</div>
+
+<script type="module">
+import { RATES, PAY_FREQUENCIES, STATUS_OPTIONS } from './data.js';
+import { calculateDAS, calculateRemittance, formatMoney, parseMoney } from './calc.js';
+
+// --- Populate dropdowns ---
+const years = Object.keys(RATES).sort((a, b) => b - a);
+
+function populateYearSelect(selectId) {
+  const sel = document.getElementById(selectId);
+  years.forEach(y => {
+    const opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y;
+    sel.appendChild(opt);
+  });
+}
+
+populateYearSelect('das-year');
+populateYearSelect('remit-year');
+
+const freqSel = document.getElementById('das-freq');
+PAY_FREQUENCIES.forEach(f => {
+  const opt = document.createElement('option');
+  opt.value = f.value;
+  opt.textContent = f.label;
+  if (f.value === 26) opt.selected = true;
+  freqSel.appendChild(opt);
+});
+
+// Status options
+const statusSel = document.getElementById('das-status');
+STATUS_OPTIONS.forEach(s => {
+  const opt = document.createElement('option');
+  opt.value = s.value;
+  opt.textContent = s.label;
+  statusSel.appendChild(opt);
+});
+
+// --- Period visibility for 2025 ---
+const periodGroup = document.getElementById('das-period-group');
+function updatePeriodVisibility() {
+  const year = parseInt(document.getElementById('das-year').value);
+  if (year === 2025) {
+    periodGroup.classList.remove('hidden');
+  } else {
+    periodGroup.classList.add('hidden');
+  }
+}
+document.getElementById('das-year').addEventListener('change', updatePeriodVisibility);
+updatePeriodVisibility();
+
+// --- Tabs ---
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+
+// --- Collapsible ---
+document.getElementById('cumul-toggle').addEventListener('click', function() {
+  this.classList.toggle('open');
+  document.getElementById('cumul-content').classList.toggle('open');
+});
+
+// --- DAS Calculation ---
+document.getElementById('das-calc').addEventListener('click', () => {
+  const year = parseInt(document.getElementById('das-year').value);
+  const payFrequency = parseInt(document.getElementById('das-freq').value);
+  const grossPay = parseMoney(document.getElementById('das-gross').value);
+  const status = document.getElementById('das-status').value;
+  const eiSubject = document.getElementById('das-ei').checked;
+  const qppSubject = document.getElementById('das-qpp').checked;
+  const useJulyRates = (year === 2025 && document.getElementById('das-period').value === 'july');
+  const cumulSalary = parseMoney(document.getElementById('das-cumul-salary').value || '0');
+  const cumulQPP = parseMoney(document.getElementById('das-cumul-qpp').value || '0');
+  const cumulQPP2 = parseMoney(document.getElementById('das-cumul-qpp2').value || '0');
+  const cumulQPIP = parseMoney(document.getElementById('das-cumul-qpip').value || '0');
+  const cumulEI = parseMoney(document.getElementById('das-cumul-ei').value || '0');
+
+  if (grossPay <= 0) return;
+
+  const result = calculateDAS({
+    year, payFrequency, grossPay, status,
+    eiSubject, qppSubject, useJulyRates,
+    cumulQPP, cumulQPP2, cumulQPIP, cumulEI, cumulSalary,
+  });
+
+  const rows = [
+    ['section', "Retenues de l'employe (Employee deductions)"],
+    ['Impot provincial QC (QC provincial tax)', result.qcTax],
+    ['Impot federal (Federal tax)', result.fedTax],
+    ['RRQ (QPP)', result.qppEmployee],
+    ['RQAP (QPIP)', result.qpipEmployee],
+    ['AE (EI)', result.eiEmployee],
+    ['total', 'Total des retenues (Total deductions)', result.totalEmployeeDeductions],
+    ['net', 'Salaire net (Net pay)', result.netPay],
+    ['section', "Cotisations de l'employeur (Employer contributions)"],
+    ['RRQ (QPP)', result.qppEmployer],
+    ['RQAP (QPIP)', result.qpipEmployer],
+    ['AE (EI)', result.eiEmployer],
+    ['total', 'Total employeur (Total employer)', result.totalEmployerContributions],
+  ];
+
+  renderTable('das-table', rows);
+  document.getElementById('das-results').style.display = 'block';
+});
+
+// --- Remittance Calculation ---
+document.getElementById('remit-calc').addEventListener('click', () => {
+  const year = parseInt(document.getElementById('remit-year').value);
+  const grossPayroll = parseMoney(document.getElementById('remit-gross').value);
+  const qcTaxWithheld = parseMoney(document.getElementById('remit-qctax').value);
+  const fedTaxWithheld = parseMoney(document.getElementById('remit-fedtax').value);
+  const qppEmployee = parseMoney(document.getElementById('remit-qpp').value);
+  const qpipEmployee = parseMoney(document.getElementById('remit-qpip').value);
+  const eiEmployee = parseMoney(document.getElementById('remit-ei').value);
+  const cnesstRate = parseFloat(document.getElementById('remit-cnesst').value || '0');
+
+  const result = calculateRemittance({
+    year, grossPayroll, qcTaxWithheld, fedTaxWithheld,
+    qppEmployee, qpipEmployee, eiEmployee,
+    cnesstRate,
+  });
+
+  const rows = [
+    ['Impot provincial QC (QC tax)', result.qcTaxWithheld],
+    ['Impot federal (Federal tax)', result.fedTaxWithheld],
+    ['section', 'RRQ (QPP)'],
+    ['  Employe (Employee)', result.qppEmployee],
+    ['  Employeur (Employer)', result.qppEmployer],
+    ['  Sous-total (Subtotal)', result.totalQPP],
+    ['section', 'RQAP (QPIP)'],
+    ['  Employe (Employee)', result.qpipEmployee],
+    ['  Employeur (Employer)', result.qpipEmployer],
+    ['  Sous-total (Subtotal)', result.totalQPIP],
+    ['section', 'AE (EI)'],
+    ['  Employe (Employee)', result.eiEmployee],
+    ['  Employeur (Employer)', result.eiEmployer],
+    ['  Sous-total (Subtotal)', result.totalEI],
+    ['section', 'Cotisations employeur (Employer contributions)'],
+    ['CNESST', result.cnesst],
+    ['FSS (HSF)', result.hsf],
+    ['Normes du travail (Labour standards)', result.cnt],
+    ['total', 'Remise totale (Total remittance)', result.totalRemittance],
+  ];
+
+  renderTable('remit-table', rows);
+  document.getElementById('remit-results').style.display = 'block';
+});
+
+// --- Table Renderer ---
+function renderTable(tableId, rows) {
+  const table = document.getElementById(tableId);
+  table.innerHTML = '';
+  for (const row of rows) {
+    const tr = document.createElement('tr');
+    if (row[0] === 'section') {
+      tr.className = 'section-header';
+      tr.innerHTML = `<td colspan="2">${row[1]}</td>`;
+    } else if (row[0] === 'total') {
+      tr.className = 'total';
+      tr.innerHTML = `<td>${row[1]}</td><td>${formatMoney(row[2])}</td>`;
+    } else if (row[0] === 'net') {
+      tr.className = 'net';
+      tr.innerHTML = `<td>${row[1]}</td><td>${formatMoney(row[2])}</td>`;
+    } else {
+      tr.innerHTML = `<td>${row[0]}</td><td>${formatMoney(row[1])}</td>`;
+    }
+    table.appendChild(tr);
+  }
+}
+</script>
+</body>
+</html>

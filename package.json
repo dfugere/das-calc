@@ -1,0 +1,12 @@
+{
+  "name": "das-calculator",
+  "version": "1.0.0",
+  "description": "Quebec payroll source deduction (DAS) and remittance calculator (2019-2025)",
+  "type": "module",
+  "scripts": {
+    "serve": "npx serve ."
+  },
+  "bin": {
+    "das-calc": "./cli.js"
+  }
+}
