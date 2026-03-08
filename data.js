@@ -52,6 +52,9 @@ export const RATES = {
     fedCEA: 116100,
     fedAbatementRate: 0.165,
 
+    // CNESST (employer-specific rate per $100 of payroll)
+    cnesstRate: 0.5,
+
     // Health Services Fund (FSS)
     hsfBaseRate: 0.0165,
 
@@ -103,6 +106,7 @@ export const RATES = {
     fedCEA: 117800,
     fedAbatementRate: 0.165,
 
+    cnesstRate: 0.5,
     hsfBaseRate: 0.0165,
     cntRate: 0.0007,
     cntMaxRemuneration: 7250000,
@@ -152,6 +156,7 @@ export const RATES = {
     fedCEA: 119500,
     fedAbatementRate: 0.165,
 
+    cnesstRate: 0.5,
     hsfBaseRate: 0.0165,
     cntRate: 0.0007,
     cntMaxRemuneration: 7400000,
@@ -207,6 +212,8 @@ export const RATES = {
     fedCEA: 122200,
     fedAbatementRate: 0.165,
 
+    cnesstRate: 0.47,
+
     // Health Services Fund (FSS)
     hsfBaseRate: 0.0165,
 
@@ -258,6 +265,7 @@ export const RATES = {
     fedCEA: 124500,
     fedAbatementRate: 0.165,
 
+    cnesstRate: 0.44,
     hsfBaseRate: 0.0165,
     cntRate: 0.0007,
     cntMaxRemuneration: null,
@@ -306,6 +314,7 @@ export const RATES = {
     fedCEA: 125700,
     fedAbatementRate: 0.165,
 
+    cnesstRate: 0.42,
     hsfBaseRate: 0.0165,
     cntRate: 0.0007,
     cntMaxRemuneration: null,
@@ -354,6 +363,7 @@ export const RATES = {
     fedCEA: 128700,
     fedAbatementRate: 0.165,
 
+    cnesstRate: 0.44,
     hsfBaseRate: 0.0165,
     cntRate: 0.0006,
     cntMaxRemuneration: 8800000,
@@ -403,6 +413,7 @@ export const RATES = {
     fedCEA: 136800,
     fedAbatementRate: 0.165,
 
+    cnesstRate: 0.41,
     hsfBaseRate: 0.0165,
     cntRate: 0.0006,
     cntMaxRemuneration: 9100000,
@@ -451,6 +462,7 @@ export const RATES = {
     fedCEA: 143300,
     fedAbatementRate: 0.165,
 
+    cnesstRate: 0.36,
     hsfBaseRate: 0.0165,
     cntRate: 0.0006,
     cntMaxRemuneration: 9400000,
@@ -513,6 +525,7 @@ export const RATES = {
     fedCEA: 147100,
     fedAbatementRate: 0.165,
 
+    cnesstRate: 0.31,
     hsfBaseRate: 0.0165,
     cntRate: 0.0006,
     cntMaxRemuneration: 9800000,

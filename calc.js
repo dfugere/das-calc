@@ -311,11 +311,13 @@ export function calculateRemittance(params) {
     qppEmployee,
     qpipEmployee,
     eiEmployee,
-    cnesstRate = 0,
+    cnesstRate,
   } = params;
 
   const r = RATES[year];
   if (!r) throw new Error(`No rates available for year ${year}`);
+
+  const effectiveCnesstRate = cnesstRate !== undefined ? cnesstRate : (r.cnesstRate || 0);
 
   // Employer matches QPP 1:1 (merged amount)
   const qppEmployer = qppEmployee;
@@ -330,7 +332,7 @@ export function calculateRemittance(params) {
   const eiEmployer = round(eiEmployee * r.eiEmployerMultiplier);
 
   // CNESST: rate per $100 of gross payroll
-  const cnesst = round(grossPayroll * cnesstRate / 100);
+  const cnesst = round(grossPayroll * effectiveCnesstRate / 100);
 
   // Health Services Fund (FSS)
   const hsf = round(grossPayroll * r.hsfBaseRate);

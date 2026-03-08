@@ -328,6 +328,16 @@ function populateYearSelect(selectId) {
 populateYearSelect('das-year');
 populateYearSelect('remit-year');
 
+// Update CNESST placeholder when remit year changes
+function updateCnesstPlaceholder() {
+  const year = parseInt(document.getElementById('remit-year').value);
+  const r = RATES[year];
+  const rate = r && r.cnesstRate ? r.cnesstRate : 0;
+  document.getElementById('remit-cnesst').placeholder = rate.toFixed(2);
+}
+document.getElementById('remit-year').addEventListener('change', updateCnesstPlaceholder);
+updateCnesstPlaceholder();
+
 const freqSel = document.getElementById('das-freq');
 PAY_FREQUENCIES.forEach(f => {
   const opt = document.createElement('option');
@@ -427,7 +437,8 @@ document.getElementById('remit-calc').addEventListener('click', () => {
   const qppEmployee = parseMoney(document.getElementById('remit-qpp').value);
   const qpipEmployee = parseMoney(document.getElementById('remit-qpip').value);
   const eiEmployee = parseMoney(document.getElementById('remit-ei').value);
-  const cnesstRate = parseFloat(document.getElementById('remit-cnesst').value || '0');
+  const cnesstInput = document.getElementById('remit-cnesst').value.trim();
+  const cnesstRate = cnesstInput !== '' ? parseFloat(cnesstInput) : undefined;
 
   const result = calculateRemittance({
     year, grossPayroll, qcTaxWithheld, fedTaxWithheld,

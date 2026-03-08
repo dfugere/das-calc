@@ -41,7 +41,7 @@ Remittance options:
   --qpp <amount>       Employee QPP contribution (merged QPP1+QPP2)
   --qpip <amount>      Employee QPIP premium
   --ei <amount>        Employee EI premium
-  --cnesst <rate>      CNESST rate per $100 (default: 0)
+  --cnesst <rate>      CNESST rate per $100 (default: from data.js for year)
 
 Examples:
   node cli.js das --year 2025 --freq 26 --gross 2500 --status celi
@@ -149,7 +149,7 @@ if (command === 'das') {
   const qppEmployee = parseMoney(opts.qpp || '0');
   const qpipEmployee = parseMoney(opts.qpip || '0');
   const eiEmployee = parseMoney(opts.ei || '0');
-  const cnesstRate = parseFloat(opts.cnesst || '0');
+  const cnesstRate = opts.cnesst !== undefined ? parseFloat(opts.cnesst) : undefined;
 
   if (!year) {
     console.error('Error: --year is required.');
